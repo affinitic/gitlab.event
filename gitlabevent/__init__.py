@@ -1,6 +1,5 @@
 from pyramid.config import Configurator
 from gitlabevent.resources import Root
-from gitlabevent.request import gitLabRequestFactory
 
 
 def main(global_config, **settings):
@@ -12,6 +11,5 @@ def main(global_config, **settings):
 
 
 def includegitlabevent(config):
-    config.set_request_factory(gitLabRequestFactory)
     config.add_route('gitlabevent', '/gitlabevent')
     config.scan('gitlabevent.views')

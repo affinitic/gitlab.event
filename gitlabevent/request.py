@@ -4,37 +4,37 @@ github.event
 
 Licensed under the GPL license, see LICENCE.txt for more details.
 """
-from git.event.request import GitPullRequest, GitPushRequest, GitRequest
+from git.event.request import GitPullRequest, GitPushRequest
 
 
 class GitLabPullRequest(GitPullRequest):
 
     @property
     def base_repo_url(self):
-        return self.json_body['pull_request']['base']['repo']['git_url']
+        return self.json_body['object_attributes']['target']['git_http_url']
 
     @property
     def base_repo_name(self):
-        return self.json_body['pull_request']['base']['repo']['name']
+        return self.json_body['object_attributes']['target']['name']
 
     @property
     def head_repo_url(self):
-        return self.json_body['pull_request']['head']['repo']['git_url']
+        return self.json_body['object_attributes']['source']['git_http_url']
 
     @property
     def head_repo_name(self):
-        return self.json_body['pull_request']['head']['repo']['name']
+        return self.json_body['object_attributes']['source']['name']
 
 
 class GitLabPushRequest(GitPushRequest):
 
     @property
     def base_repo_url(self):
-        return self.json_body['repository']['html_url']
+        return self.json_body['project']['git_html_url']
 
     @property
     def base_repo_name(self):
-        return self.json_body['repository']['name']
+        return self.json_body['project']['name']
 
     @property
     def commits(self):
@@ -42,7 +42,7 @@ class GitLabPushRequest(GitPushRequest):
 
     @property
     def author(self):
-        return self.json_body['pusher']['name']
+        return self.json_body['user_name']
 
 
 class GitLabCommit(object):
@@ -61,7 +61,7 @@ class GitLabCommit(object):
 
     @property
     def username(self):
-        return self.commit_body['author']['username']
+        return self.commit_body['author']['name']
 
     @property
     def message(self):
@@ -74,16 +74,3 @@ class GitLabCommit(object):
     @property
     def url(self):
         return self.commit_body['url']
-
-
-REQUESTS = {'pull_request': GitLabPullRequest,
-            'push': GitLabPushRequest}
-
-
-def gitLabRequestFactory(env):
-    event = env.get('HTTP_X_GITHUB_EVENT')
-    if event:
-        requestClass = REQUESTS.get(event, GitRequest)
-        return requestClass(env)
-    else:
-        raise NotImplementedError
